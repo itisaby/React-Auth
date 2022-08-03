@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { faCheck, faTimes, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import axios from './axios';
+
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
 const Register = () => {
@@ -49,10 +51,33 @@ const Register = () => {
             setErrMsg("Invalid Entry");
             return;
         }
-        console.log(user, pwd);
-        setSuccessMsg(true);
+        // console.log(user, pwd);
+        // setSuccessMsg(true);
+        try{
+            const res = await axios.post('/register', JSON.stringify({
+                user: user,
+                pwd: pwd
+            }),{
+                headers: { 'Content-Type': 'application/json' },
+                withCredentials: true
+            });
+            console.log(res.data);
+            console.log(res.accessToken);
+            console.log(JSON.stringify(res));
+            console.log(res);
+            setSuccessMsg(true);
+        }
+        catch(err){
+            if(!err.response){
+                setErrMsg('No server Response')
+            } else if(err.response?.status === 409){
+                setErrMsg("Username Taken");
+            }else{
+                setErrMsg("Unknown Error");
+            }
+            errRef.current.focus();
+        }
     }
-
     return (
         <>
             {
